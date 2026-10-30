@@ -16,6 +16,7 @@ class PetaController extends Controller
     {
         $features = Sekolah::query()
             ->when($request->jenjang, fn ($q, $j) => $q->where('jenjang', $j))
+             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->get()
             ->map(fn ($s) => [
                 'type' => 'Feature',

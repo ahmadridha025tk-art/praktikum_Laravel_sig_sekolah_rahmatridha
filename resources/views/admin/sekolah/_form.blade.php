@@ -1,4 +1,4 @@
-```blade
+
 @php
     $teks = [
         'npsn'      => 'NPSN (8 digit)',
@@ -16,6 +16,7 @@
 @endphp
 
 <div class="bg-white rounded shadow p-6 grid md:grid-cols-2 gap-6">
+
     <div class="space-y-4">
         @foreach ($teks as $name => $label)
             <div>
@@ -43,11 +44,7 @@
                     {{ ucfirst($name) }}
                 </label>
 
-                <select
-                    id="{{ $name }}"
-                    name="{{ $name }}"
-                    class="{{ $cls }}"
-                >
+                <select id="{{ $name }}" name="{{ $name }}" class="{{ $cls }}">
                     <option value="">-- Pilih --</option>
 
                     @foreach ($opsi as $o)
@@ -88,6 +85,14 @@
         </p>
 
         <div id="map-picker" class="h-80 rounded border"></div>
+
+        <button
+            type="button"
+            id="gunakan-lokasi"
+            class="px-4 py-2 bg-green-600 text-white rounded"
+        >
+            Gunakan Lokasi Saya
+        </button>
 
         <div class="grid grid-cols-2 gap-4">
             <div>
@@ -147,30 +152,35 @@
     </div>
 </div>
 
+
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function () {
     const latInput = document.getElementById('latitude');
     const lngInput = document.getElementById('longitude');
+    const tombolLokasi = document.getElementById('gunakan-lokasi');
 
-    const sudahAda =
-        latInput.value !== '' && lngInput.value !== '';
+    if (!latInput || !lngInput || !tombolLokasi) {
+        console.error('Elemen lokasi tidak ditemukan.');
+        return;
+    }
+
+    if (typeof L === 'undefined') {
+        alert('Leaflet gagal dimuat. Periksa koneksi internet.');
+        return;
+    }
+
+    const sudahAda = latInput.value !== '' && lngInput.value !== '';
 
     const pusat = sudahAda
-        ? [
-            parseFloat(latInput.value),
-            parseFloat(lngInput.value)
-        ]
+        ? [parseFloat(latInput.value), parseFloat(lngInput.value)]
         : [-3.3194, 114.5908];
 
-    const map = L.map('map-picker').setView(
-        pusat,
-        sudahAda ? 16 : 13
-    );
+    const map = L.map('map-picker').setView(pusat, sudahAda ? 16 : 13);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     const marker = L.marker(pusat, {
@@ -182,18 +192,76 @@
         lngInput.value = lng.toFixed(7);
     }
 
-    map.on('click', (e) => {
+    // Tombol Gunakan Lokasi Saya
+    tombolLokasi.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+            alert('Browser tidak mendukung fitur lokasi.');
+            return;
+        }
+
+        tombolLokasi.disabled = true;
+        tombolLokasi.textContent = 'Mengambil lokasi...';
+
+        navigator.geolocation.getCurrentPosition(
+            function (posisi) {
+                const lat = posisi.coords.latitude;
+                const lng = posisi.coords.longitude;
+
+                marker.setLatLng([lat, lng]);
+                map.setView([lat, lng], 16);
+                isiKoordinat(lat, lng);
+
+                tombolLokasi.disabled = false;
+                tombolLokasi.textContent = 'Gunakan Lokasi Saya';
+
+                alert('Lokasi berhasil ditemukan!');
+            },
+            function (error) {
+                tombolLokasi.disabled = false;
+                tombolLokasi.textContent = 'Gunakan Lokasi Saya';
+
+                let pesan;
+
+                switch (error.code) {
+                    case 1:
+                        pesan = 'Izin lokasi ditolak. Periksa izin lokasi browser.';
+                        break;
+                    case 2:
+                        pesan = 'Lokasi perangkat tidak tersedia.';
+                        break;
+                    case 3:
+                        pesan = 'Waktu pengambilan lokasi habis. Coba lagi.';
+                        break;
+                    default:
+                        pesan = error.message;
+                }
+
+                alert('Gagal mengambil lokasi: ' + pesan);
+                console.error(error);
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 60000,
+                maximumAge: 60000
+            }
+        );
+    });
+
+    // Klik peta untuk menentukan lokasi
+    map.on('click', function (e) {
         marker.setLatLng(e.latlng);
         isiKoordinat(e.latlng.lat, e.latlng.lng);
     });
 
-    marker.on('dragend', () => {
-        const p = marker.getLatLng();
-        isiKoordinat(p.lat, p.lng);
+    // Geser marker
+    marker.on('dragend', function () {
+        const posisi = marker.getLatLng();
+        isiKoordinat(posisi.lat, posisi.lng);
     });
 
-    [latInput, lngInput].forEach((el) => {
-        el.addEventListener('change', () => {
+    // Perubahan koordinat manual
+    [latInput, lngInput].forEach(function (el) {
+        el.addEventListener('change', function () {
             const lat = parseFloat(latInput.value);
             const lng = parseFloat(lngInput.value);
 
@@ -203,6 +271,10 @@
             }
         });
     });
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 300);
+});
 </script>
 @endpush
-```
