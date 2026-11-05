@@ -29,8 +29,10 @@
                     id="{{ $name }}"
                     name="{{ $name }}"
                     value="{{ old($name, $sekolah->$name) }}"
+                    @readonly($name === 'npsn' && auth()->user()->isSekolah())
                     class="{{ $cls }}"
                 >
+                
 
                 @error($name)
                     <p class="text-red-600 text-sm">{{ $message }}</p>
@@ -142,12 +144,12 @@
                 Simpan
             </button>
 
-            <a
-                href="{{ route('admin.sekolah.index') }}"
-                class="px-5 py-2 bg-gray-300 rounded"
-            >
-                Batal
-            </a>
+                <a
+         href="{{ auth()->user()->isDinas() ? route('dinas.sekolah.index') : route('dashboard') }}"
+         class="px-5 py-2 bg-gray-300 rounded"
+>       
+            Batal
+        </a>
         </div>
     </div>
 </div>

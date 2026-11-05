@@ -1,16 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\SekolahController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
 
 // Publik
 Route::get('/', [PetaController::class, 'index'])->name('peta.index');
-
-Route::get('/data/sekolah', [PetaController::class, 'geojson'])
-    ->name('peta.data');
+Route::get('/data/sekolah', [PetaController::class, 'geojson'])->name('peta.data');
 
 // Tamu
 Route::middleware('guest')->group(function () {
@@ -23,9 +21,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-    // Admin / Dinas: Kelola sekolah (diamankan dengan middleware role:dinas)
-    Route::middleware(['role:dinas'])
-        ->prefix('admin')->name('admin.')->group(function () {
-            Route::resource('sekolah', SekolahController::class)->except('show');
+    // Dinas: daftar, tambah, dan hapus sekolah
+    Route::middleware('role:dinas')->prefix('dinas')->name('dinas.')
+        ->group(function () {
+            Route::resource('sekolah', SekolahController::class)
+                ->only(['index', 'create', 'store', 'destroy']);
         });
+
+    // Dinas dan Sekolah: ubah data (dibatasi Policy)
+    Route::middleware('role:dinas,sekolah')->group(function () {
+        Route::get('sekolah/{sekolah}/edit', [SekolahController::class, 'edit'])
+            ->name('sekolah.edit');
+        Route::put('sekolah/{sekolah}', [SekolahController::class, 'update'])
+            ->name('sekolah.update');
+    });
 });

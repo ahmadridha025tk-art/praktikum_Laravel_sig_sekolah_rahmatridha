@@ -5,7 +5,7 @@
 <h1 class="text-2xl font-bold mb-4">Ubah Sekolah</h1>
 
 <form method="POST"
-      action="{{ route('admin.sekolah.update', $sekolah) }}">
+      action="{{ route('dinas.sekolah.update', $sekolah) }}">
     @csrf
     @method('PUT')
 
