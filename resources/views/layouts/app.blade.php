@@ -10,10 +10,18 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
     <nav class="bg-blue-800 text-white">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex gap-6">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-6">
             <span class="font-bold">SIG Sekolah</span>
             <a href="{{ url('/') }}">Peta Publik</a>
             <a href="{{ route('admin.sekolah.index') }}">Data Sekolah</a>
+
+            {{-- Tambahkan kode ini untuk tombol keluar sementara --}}
+            @auth
+                <form method="POST" action="{{ route('logout') }}" class="ml-auto">
+                    @csrf
+                    <button class="underline">Keluar ({{ auth()->user()->name }})</button>
+                </form>
+            @endauth
         </div>
     </nav>
 
@@ -31,3 +39,10 @@
     @stack('scripts')
 </body>
 </html>
+```[cite: 12, 18]
+
+---
+
+Silakan dicoba uji coba aplikasinya: buka `[http://127.0.0.1:8000/login](http://127.0.0.1:8000/login)`, masuk menggunakan akun `admin@sig.test` dengan kata sandi `password123`, lalu coba fitur keluar (*logout*)[cite: 12]. 
+
+Jika sudah beres, kabari saya agar kita bisa langsung lanjut ke **Praktikum 13: Middleware Role**[cite: 13]!
