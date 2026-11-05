@@ -6,14 +6,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 
+// Publik
 Route::get('/', [PetaController::class, 'index'])->name('peta.index');
 
 Route::get('/data/sekolah', [PetaController::class, 'geojson'])
     ->name('peta.data');
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('sekolah', SekolahController::class)->except('show');
-});
 
 // Tamu
 Route::middleware('guest')->group(function () {
@@ -25,4 +22,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    // Admin / Dinas: Kelola sekolah (diamankan dengan middleware role:dinas)
+    Route::middleware(['role:dinas'])
+        ->prefix('admin')->name('admin.')->group(function () {
+            Route::resource('sekolah', SekolahController::class)->except('show');
+        });
 });

@@ -39,10 +39,3 @@
     @stack('scripts')
 </body>
 </html>
-```[cite: 12, 18]
-
----
-
-Silakan dicoba uji coba aplikasinya: buka `[http://127.0.0.1:8000/login](http://127.0.0.1:8000/login)`, masuk menggunakan akun `admin@sig.test` dengan kata sandi `password123`, lalu coba fitur keluar (*logout*)[cite: 12]. 
-
-Jika sudah beres, kabari saya agar kita bisa langsung lanjut ke **Praktikum 13: Middleware Role**[cite: 13]!
