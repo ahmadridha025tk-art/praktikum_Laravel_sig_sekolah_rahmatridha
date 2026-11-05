@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\SekolahController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfilSekolahController;
 
 // Publik
 Route::get('/', [PetaController::class, 'index'])->name('peta.index');
@@ -35,4 +36,10 @@ Route::middleware('auth')->group(function () {
         Route::put('sekolah/{sekolah}', [SekolahController::class, 'update'])
             ->name('sekolah.update');
     });
+
+    // Di dalam grup Route::middleware('role:dinas,sekolah')->group(...) tambahkan:
+Route::get('sekolah/{sekolah}/profil', [ProfilSekolahController::class, 'edit'])
+    ->name('sekolah.profil.edit');
+Route::put('sekolah/{sekolah}/profil', [ProfilSekolahController::class, 'update'])
+    ->name('sekolah.profil.update');
 });
