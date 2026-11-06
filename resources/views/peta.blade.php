@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,10 +70,11 @@
             height: 18px;
             border: 2px solid white;
             border-radius: 50%;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
+
 <body>
 
 <header>
@@ -103,9 +105,9 @@
     <span id="jumlah"></span>
 
     @auth
-    <a href="{{ route('dashboard') }}">Dashboard</a>
+        <a href="{{ route('dashboard') }}">Dashboard</a>
     @else
-    <a href="{{ route('login') }}">Masuk</a>
+        <a href="{{ route('login') }}">Masuk</a>
     @endauth
 
 </header>
@@ -119,38 +121,38 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // Membuat peta
-    // Membuat peta
-const map = L.map('map').setView([-3.3194, 114.5908], 12);
 
-// Peta dasar OpenStreetMap
-const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-});
+    // Membuat peta
+    const map = L.map('map').setView([-3.3194, 114.5908], 12);
 
-// Peta dasar Satelit
-const satelit = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {
+    // Peta dasar OpenStreetMap
+    const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: 'Tiles &copy; Esri'
-    }
-);
+        attribution: '&copy; OpenStreetMap contributors'
+    });
 
-// Menampilkan peta OpenStreetMap sebagai default
-osm.addTo(map);
+    // Peta dasar Satelit
+    const satelit = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri'
+        }
+    );
 
-// Pilihan peta dasar
-const baseMaps = {
-    "OpenStreetMap": osm,
-    "Satelit": satelit
-};
+    // Menampilkan peta OpenStreetMap sebagai default
+    osm.addTo(map);
 
-// Menambahkan kontrol pergantian peta
-L.control.layers(baseMaps, null, {
-    collapsed: false
-}).addTo(map);
+    // Pilihan peta dasar
+    const baseMaps = {
+        "OpenStreetMap": osm,
+        "Satelit": satelit
+    };
+
+    // Menambahkan kontrol pergantian peta
+    L.control.layers(baseMaps, null, {
+        collapsed: false
+    }).addTo(map);
 
     // Mengamankan teks popup
     function esc(teks) {
@@ -178,7 +180,9 @@ L.control.layers(baseMaps, null, {
 
     // Menyimpan lapisan GeoJSON
     let lapisan = L.geoJSON(null, {
+
         pointToLayer: function (fitur, latlng) {
+
             const warna = warnaMarker(fitur.properties.jenjang);
 
             // Ikon lingkaran berwarna
@@ -197,23 +201,38 @@ L.control.layers(baseMaps, null, {
         },
 
         onEachFeature: function (fitur, layer) {
+
             const p = fitur.properties;
             const [lng, lat] = fitur.geometry.coordinates;
 
+            // >>> PERUBAHAN PRAKTIKUM 17: POPUP PERTAMA
             layer.bindPopup(`
                 <strong>${esc(p.nama)}</strong><br>
                 NPSN: ${esc(p.npsn)}<br>
                 ${esc(p.jenjang)} - ${esc(p.status)}<br>
                 ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
                 Telp: ${esc(p.telepon) || '-'}<br>
+
+                <hr>
+                <strong>Profil Sekolah</strong><br>
+                Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
+                Akreditasi: ${esc(p.akreditasi) || '-'}<br>
+                Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
+                Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
+
+                <hr>
                 <small>Koordinat: ${lat}, ${lng}</small>
             `);
+            // <<< AKHIR PERUBAHAN PRAKTIKUM 17
+
         }
     });
 
     // Memuat data sekolah berdasarkan filter
     async function muatData(jenjang = '', status = '') {
+
         try {
+
             const params = new URLSearchParams({
                 jenjang: jenjang,
                 status: status
@@ -229,7 +248,9 @@ L.control.layers(baseMaps, null, {
 
             // Buat ulang lapisan GeoJSON
             lapisan = L.geoJSON(data, {
+
                 pointToLayer: function (fitur, latlng) {
+
                     const warna = warnaMarker(fitur.properties.jenjang);
 
                     const ikon = L.divIcon({
@@ -247,17 +268,30 @@ L.control.layers(baseMaps, null, {
                 },
 
                 onEachFeature: function (fitur, layer) {
+
                     const p = fitur.properties;
                     const [lng, lat] = fitur.geometry.coordinates;
 
+                    // >>> PERUBAHAN PRAKTIKUM 17: POPUP KEDUA
                     layer.bindPopup(`
                         <strong>${esc(p.nama)}</strong><br>
                         NPSN: ${esc(p.npsn)}<br>
                         ${esc(p.jenjang)} - ${esc(p.status)}<br>
                         ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
                         Telp: ${esc(p.telepon) || '-'}<br>
+
+                        <hr>
+                        <strong>Profil Sekolah</strong><br>
+                        Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
+                        Akreditasi: ${esc(p.akreditasi) || '-'}<br>
+                        Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
+                        Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
+
+                        <hr>
                         <small>Koordinat: ${lat}, ${lng}</small>
                     `);
+                    // <<< AKHIR PERUBAHAN PRAKTIKUM 17
+
                 }
             });
 
@@ -272,13 +306,16 @@ L.control.layers(baseMaps, null, {
             }
 
         } catch (error) {
+
             console.error('Gagal memuat data sekolah:', error);
+
             alert('Gagal memuat data sekolah. Periksa koneksi atau endpoint GeoJSON.');
         }
     }
 
     // Filter jenjang dan status
     function terapkanFilter() {
+
         const jenjang = document.getElementById('filter-jenjang').value;
         const status = document.getElementById('filter-status').value;
 
@@ -293,6 +330,7 @@ L.control.layers(baseMaps, null, {
 
     // Pencarian sekolah
     function cariSekolah() {
+
         const kataKunci = document.getElementById('cari-sekolah')
             .value.trim().toLowerCase();
 
@@ -304,9 +342,11 @@ L.control.layers(baseMaps, null, {
         let ditemukan = false;
 
         lapisan.eachLayer(function (layer) {
+
             const nama = layer.feature.properties.nama.toLowerCase();
 
             if (nama.includes(kataKunci)) {
+
                 map.setView(layer.getLatLng(), 17);
 
                 // Buka popup setelah animasi zoom
@@ -328,9 +368,11 @@ L.control.layers(baseMaps, null, {
 
     document.getElementById('cari-sekolah')
         .addEventListener('keydown', function (event) {
+
             if (event.key === 'Enter') {
                 cariSekolah();
             }
+
         });
 
     // Jalankan saat halaman dibuka
