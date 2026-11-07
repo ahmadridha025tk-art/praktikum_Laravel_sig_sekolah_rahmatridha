@@ -205,26 +205,41 @@
             const p = fitur.properties;
             const [lng, lat] = fitur.geometry.coordinates;
 
-            // >>> PERUBAHAN PRAKTIKUM 17: POPUP PERTAMA
-            layer.bindPopup(`
-                <strong>${esc(p.nama)}</strong><br>
-                NPSN: ${esc(p.npsn)}<br>
-                ${esc(p.jenjang)} - ${esc(p.status)}<br>
-                ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
-                Telp: ${esc(p.telepon) || '-'}<br>
+            
+            // >>> POPUP PERTAMA: DITAMBAHKAN LOGO DAN LINK PROFIL PUBLIK
+layer.bindPopup(`
+    ${p.logo_url ? `
+        <div style="text-align:center; margin-bottom:8px;">
+            <img src="${esc(p.logo_url)}"
+                 alt="Logo ${esc(p.nama)}"
+                 style="width:70px;height:70px;object-fit:contain;">
+        </div>
+    ` : ''}
 
-                <hr>
-                <strong>Profil Sekolah</strong><br>
-                Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
-                Akreditasi: ${esc(p.akreditasi) || '-'}<br>
-                Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
-                Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
+    <strong>${esc(p.nama)}</strong><br>
+    NPSN: ${esc(p.npsn)}<br>
+    ${esc(p.jenjang)} - ${esc(p.status)}<br>
+    ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
+    Telp: ${esc(p.telepon) || '-'}<br>
 
-                <hr>
-                <small>Koordinat: ${lat}, ${lng}</small>
-            `);
-            // <<< AKHIR PERUBAHAN PRAKTIKUM 17
+    <hr>
+    <strong>Profil Sekolah</strong><br>
+    Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
+    Akreditasi: ${esc(p.akreditasi) || '-'}<br>
+    Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
+    Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
 
+    <hr>
+    <a href="${esc(p.profil_url)}"
+       style="display:inline-block;background:#2563eb;color:white;
+              padding:7px 12px;border-radius:5px;text-decoration:none;"
+       target="_blank"
+       rel="noopener noreferrer">
+        Lihat Profil Sekolah
+    </a>
+    <br><br>
+    <small>Koordinat: ${lat}, ${lng}</small>
+`);
         }
     });
 
@@ -272,26 +287,40 @@
                     const p = fitur.properties;
                     const [lng, lat] = fitur.geometry.coordinates;
 
-                    // >>> PERUBAHAN PRAKTIKUM 17: POPUP KEDUA
-                    layer.bindPopup(`
-                        <strong>${esc(p.nama)}</strong><br>
-                        NPSN: ${esc(p.npsn)}<br>
-                        ${esc(p.jenjang)} - ${esc(p.status)}<br>
-                        ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
-                        Telp: ${esc(p.telepon) || '-'}<br>
+                   // >>> POPUP KEDUA: DITAMBAHKAN LOGO DAN LINK PROFIL PUBLIK
+layer.bindPopup(`
+    ${p.logo_url ? `
+        <div style="text-align:center; margin-bottom:8px;">
+            <img src="${esc(p.logo_url)}"
+                 alt="Logo ${esc(p.nama)}"
+                 style="width:70px;height:70px;object-fit:contain;">
+        </div>
+    ` : ''}
 
-                        <hr>
-                        <strong>Profil Sekolah</strong><br>
-                        Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
-                        Akreditasi: ${esc(p.akreditasi) || '-'}<br>
-                        Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
-                        Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
+    <strong>${esc(p.nama)}</strong><br>
+    NPSN: ${esc(p.npsn)}<br>
+    ${esc(p.jenjang)} - ${esc(p.status)}<br>
+    ${esc(p.alamat)}, ${esc(p.kecamatan)}<br>
+    Telp: ${esc(p.telepon) || '-'}<br>
 
-                        <hr>
-                        <small>Koordinat: ${lat}, ${lng}</small>
-                    `);
-                    // <<< AKHIR PERUBAHAN PRAKTIKUM 17
+    <hr>
+    <strong>Profil Sekolah</strong><br>
+    Kepala Sekolah: ${esc(p.kepala_sekolah) || '-'}<br>
+    Akreditasi: ${esc(p.akreditasi) || '-'}<br>
+    Jumlah Siswa: ${p.jumlah_siswa ?? '-'}<br>
+    Jumlah Guru: ${p.jumlah_guru ?? '-'}<br>
 
+    <hr>
+    <a href="${esc(p.profil_url)}"
+       style="display:inline-block;background:#2563eb;color:white;
+              padding:7px 12px;border-radius:5px;text-decoration:none;"
+       target="_blank"
+       rel="noopener noreferrer">
+        Lihat Profil Sekolah
+    </a>
+    <br><br>
+    <small>Koordinat: ${lat}, ${lng}</small>
+`);
                 }
             });
 

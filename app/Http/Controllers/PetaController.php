@@ -14,7 +14,6 @@ class PetaController extends Controller
 
     public function geojson(Request $request)
     {
-        // Mengambil data sekolah beserta profilnya
         $features = Sekolah::with('profil')
             ->when($request->jenjang, fn ($q, $j) => $q->where('jenjang', $j))
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
@@ -23,29 +22,36 @@ class PetaController extends Controller
                 'type' => 'Feature',
 
                 'geometry' => [
-                   'type' => 'Point',
+                    'type' => 'Point',
                     'coordinates' => [$s->longitude, $s->latitude],
                 ],
 
                 'properties' => [
-                    'npsn'           => $s->npsn,
-                    'nama'           => $s->nama,
-                    'jenjang'        => $s->jenjang,
-                    'status'         => $s->status,
-                    'alamat'         => $s->alamat,
-                    'kecamatan'      => $s->kecamatan,
-                    'telepon'        => $s->telepon,
+                    'id' => $s->id,
+                    'npsn' => $s->npsn,
+                    'nama' => $s->nama,
+                    'jenjang' => $s->jenjang,
+                    'status' => $s->status,
+                    'alamat' => $s->alamat,
+                    'kecamatan' => $s->kecamatan,
+                    'telepon' => $s->telepon,
 
-                    // >>> TAMBAHAN PRAKTIKUM 17
+                    // Informasi profil sekolah
                     'kepala_sekolah' => $s->profil?->kepala_sekolah,
-                    'akreditasi'     => $s->profil?->akreditasi,
-                    'jumlah_siswa'   => $s->profil?->jumlah_siswa,
-                    'jumlah_guru'    => $s->profil?->jumlah_guru,
-                    // <<< AKHIR TAMBAHAN PRAKTIKUM 17
+                    'akreditasi' => $s->profil?->akreditasi,
+                    'jumlah_siswa' => $s->profil?->jumlah_siswa,
+                    'jumlah_guru' => $s->profil?->jumlah_guru,
+
+                    // Logo sekolah
+                    'logo_url' => $s->profil?->logo
+                        ? asset('storage/' . $s->profil->logo)
+                        : null,
+
+                    // Link halaman profil publik
+                    'profil_url' => route('sekolah.profil.publik', $s->id),
                 ],
             ]);
 
-        // Mengirim data dalam format GeoJSON
         return response()->json([
             'type' => 'FeatureCollection',
             'features' => $features,

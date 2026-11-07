@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfilSekolahController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PublicProfilSekolahController;
 
 // ==========================================
 // PUBLIK
@@ -19,6 +20,12 @@ Route::get('/', [PetaController::class, 'index'])
 
 Route::get('/data/sekolah', [PetaController::class, 'geojson'])
     ->name('peta.data');
+
+ // Halaman profil publik sekolah
+Route::get('/profil-sekolah/{sekolah}', [
+    PublicProfilSekolahController::class,
+    'show'
+])->name('sekolah.profil.publik');   
 
 
 // ==========================================
