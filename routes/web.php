@@ -10,72 +10,116 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Support\Facades\Route;
 
-// Publik
+// ==========================================
+// PUBLIK
+// ==========================================
+
 Route::get('/', [PetaController::class, 'index'])
     ->name('peta.index');
 
 Route::get('/data/sekolah', [PetaController::class, 'geojson'])
     ->name('peta.data');
 
-// Tamu
+
+// ==========================================
+// TAMU
+// ==========================================
+
 Route::middleware('guest')->group(function () {
+
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:5,1');
+
 });
 
-// Pengguna yang sudah login
+
+// ==========================================
+// PENGGUNA YANG SUDAH LOGIN
+// ==========================================
+
 Route::middleware('auth')->group(function () {
 
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
+    // Dashboard
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
 
-    // Ubah Kata Sandi
+
+    // ======================================
+    // UBAH KATA SANDI
+    // ======================================
+
     Route::get('/ubah-password', [PasswordController::class, 'edit'])
         ->name('password.edit');
 
     Route::put('/ubah-password', [PasswordController::class, 'update'])
         ->name('password.update');
 
-    // Dinas: Kelola Data Sekolah
+
+    // ======================================
+    // DINAS: KELOLA DATA SEKOLAH
+    // ======================================
+
     Route::middleware('role:dinas')
         ->prefix('dinas')
         ->name('dinas.')
         ->group(function () {
 
             Route::resource('sekolah', SekolahController::class)
-                ->except('show');
+                ->only([
+                    'index',
+                    'create',
+                    'store',
+                    'destroy'
+                ]);
 
         });
 
-    // Dinas dan Sekolah: Ubah Data dan Profil Sekolah
+
+    // ======================================
+    // DINAS DAN SEKOLAH: UBAH DATA SEKOLAH
+    // ======================================
+
     Route::middleware('role:dinas,sekolah')->group(function () {
 
+        // Membuka halaman edit sekolah
         Route::get('/sekolah/{sekolah}/edit', [SekolahController::class, 'edit'])
             ->name('sekolah.edit');
 
+        // Menyimpan perubahan data sekolah
         Route::put('/sekolah/{sekolah}', [SekolahController::class, 'update'])
             ->name('sekolah.update');
 
-        // Profil Sekolah
+
+        // ==================================
+        // PROFIL SEKOLAH
+        // ==================================
+
         Route::get('/sekolah/{sekolah}/profil', [ProfilSekolahController::class, 'edit'])
             ->name('sekolah.profil.edit');
 
         Route::put('/sekolah/{sekolah}/profil', [ProfilSekolahController::class, 'update'])
             ->name('sekolah.profil.update');
+
     });
 
-    // Admin: Kelola Pengguna
+
+    // ======================================
+    // ADMIN: KELOLA PENGGUNA
+    // ======================================
+
     Route::middleware('role:admin')
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
 
+            // CRUD pengguna
             Route::resource('users', UserController::class)
                 ->except('show');
 
