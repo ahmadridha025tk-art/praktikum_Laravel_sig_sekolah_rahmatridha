@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
-    
+
     // Ubah Kata Sandi
 Route::get('/ubah-password', [PasswordController::class, 'edit'])
     ->name('password.edit');
@@ -66,6 +66,11 @@ Route::put('/ubah-password', [PasswordController::class, 'update'])
         ->group(function () {
             Route::resource('users', UserController::class)
                 ->except('show');
+
+                 // Mengaktifkan atau menonaktifkan akun pengguna
+        Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleActive'])
+            ->name('users.toggleActive');
         });
+       
 
 });

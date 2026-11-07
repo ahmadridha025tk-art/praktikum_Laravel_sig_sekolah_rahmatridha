@@ -86,6 +86,24 @@ class UserController extends Controller
             ->with('success', 'Pengguna berhasil dihapus.');
     }
 
+    public function toggleActive(Request $request, User $user)
+{
+    // Admin tidak boleh menonaktifkan akunnya sendiri
+    if ($user->is($request->user())) {
+        return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+    }
+
+    // Ubah status aktif menjadi nonaktif, atau sebaliknya
+    $user->is_active = !$user->is_active;
+    $user->save();
+
+    $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+    return redirect()
+        ->route('admin.users.index')
+        ->with('success', "Akun {$user->name} berhasil {$status}.");
+}
+
     private function daftarSekolah()
     {
         return Sekolah::orderBy('nama')->get(['id', 'npsn', 'nama']);

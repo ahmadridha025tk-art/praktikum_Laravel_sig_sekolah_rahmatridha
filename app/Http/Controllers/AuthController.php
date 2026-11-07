@@ -13,11 +13,13 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+    {$credentials = $request->validate([
+    'email' => ['required', 'email'],
+    'password' => ['required'],
+    ]);
+    
+    // Hanya akun aktif yang boleh login
+    $credentials['is_active'] = true;
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
