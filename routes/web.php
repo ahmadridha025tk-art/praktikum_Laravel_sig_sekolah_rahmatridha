@@ -6,6 +6,7 @@ use App\Http\Controllers\PetaController;
 use App\Http\Controllers\SekolahController;
 use App\Http\Controllers\ProfilSekolahController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordController;
 use Illuminate\Support\Facades\Route;
 
 // Publik
@@ -24,6 +25,13 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    
+    // Ubah Kata Sandi
+Route::get('/ubah-password', [PasswordController::class, 'edit'])
+    ->name('password.edit');
+
+Route::put('/ubah-password', [PasswordController::class, 'update'])
+    ->name('password.update');
 
     // Dinas: daftar, tambah, dan hapus sekolah
     Route::middleware('role:dinas')

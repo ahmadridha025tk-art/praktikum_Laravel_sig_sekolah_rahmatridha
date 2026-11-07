@@ -19,6 +19,9 @@
 
             @auth
                 <a href="{{ route('dashboard') }}">Dashboard</a>
+                <a href="{{ route('password.edit') }}">
+                Ubah Kata Sandi
+                </a>
 
                 @if (auth()->user()->isDinas())
                     <a href="{{ route('dinas.sekolah.index') }}">Data Sekolah</a>
