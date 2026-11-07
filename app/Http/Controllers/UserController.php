@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,7 +13,10 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::with('sekolah')
-            ->when($request->role, fn ($q, $r) => $q->where('role', $r))
+            ->when(
+                $request->role,
+                fn ($q, $r) => $q->where('role', $r)
+            )
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -32,13 +36,14 @@ class UserController extends Controller
     {
         $data = $request->validate($this->rules($request));
 
-        if ($data['role'] !== User::ROLE_SEKOLAH) {
+        if ($data['role'] !== Role::SEKOLAH->value) {
             $data['sekolah_id'] = null;
         }
 
         User::create($data);
 
-        return redirect()->route('admin.users.index')
+        return redirect()
+            ->route('admin.users.index')
             ->with('success', 'Pengguna berhasil ditambahkan.');
     }
 
@@ -52,15 +57,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $data = $request->validate($this->rules($request, $user->id));
+        $data = $request->validate(
+            $this->rules($request, $user->id)
+        );
 
-        if ($user->is($request->user()) && $data['role'] !== User::ROLE_ADMIN) {
+        if (
+            $user->is($request->user()) &&
+            $data['role'] !== Role::ADMIN->value
+        ) {
             return back()->withInput()->withErrors([
                 'role' => 'Anda tidak dapat mengubah role akun sendiri.',
             ]);
         }
 
-        if ($data['role'] !== User::ROLE_SEKOLAH) {
+        if ($data['role'] !== Role::SEKOLAH->value) {
             $data['sekolah_id'] = null;
         }
 
@@ -70,49 +80,67 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')
+        return redirect()
+            ->route('admin.users.index')
             ->with('success', 'Pengguna berhasil diperbarui.');
     }
 
     public function destroy(Request $request, User $user)
     {
         if ($user->is($request->user())) {
-            return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
+            return back()->with(
+                'error',
+                'Anda tidak dapat menghapus akun sendiri.'
+            );
         }
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')
+        return redirect()
+            ->route('admin.users.index')
             ->with('success', 'Pengguna berhasil dihapus.');
     }
 
     public function toggleActive(Request $request, User $user)
-{
-    // Admin tidak boleh menonaktifkan akunnya sendiri
-    if ($user->is($request->user())) {
-        return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+    {
+        // Admin tidak boleh menonaktifkan akunnya sendiri
+        if ($user->is($request->user())) {
+            return back()->with(
+                'error',
+                'Anda tidak dapat menonaktifkan akun sendiri.'
+            );
+        }
+
+        // Ubah status aktif menjadi nonaktif, atau sebaliknya
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $status = $user->is_active
+            ? 'diaktifkan'
+            : 'dinonaktifkan';
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with(
+                'success',
+                "Akun {$user->name} berhasil {$status}."
+            );
     }
-
-    // Ubah status aktif menjadi nonaktif, atau sebaliknya
-    $user->is_active = !$user->is_active;
-    $user->save();
-
-    $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
-
-    return redirect()
-        ->route('admin.users.index')
-        ->with('success', "Akun {$user->name} berhasil {$status}.");
-}
 
     private function daftarSekolah()
     {
-        return Sekolah::orderBy('nama')->get(['id', 'npsn', 'nama']);
+        return Sekolah::orderBy('nama')
+            ->get(['id', 'npsn', 'nama']);
     }
 
     private function rules(Request $request, ?int $id = null): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
             'email' => [
                 'required',
@@ -123,15 +151,16 @@ class UserController extends Controller
 
             'role' => [
                 'required',
-                Rule::in([
-                    User::ROLE_ADMIN,
-                    User::ROLE_DINAS,
-                    User::ROLE_SEKOLAH,
-                ]),
+                Rule::in(array_map(
+                    fn (Role $role) => $role->value,
+                    Role::cases()
+                )),
             ],
 
             'sekolah_id' => [
-                Rule::requiredIf($request->role === User::ROLE_SEKOLAH),
+                Rule::requiredIf(
+                    $request->role === Role::SEKOLAH->value
+                ),
                 'nullable',
                 'exists:sekolahs,id',
             ],
