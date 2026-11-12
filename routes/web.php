@@ -15,11 +15,13 @@ use App\Http\Controllers\PublicProfilSekolahController;
 // PUBLIK
 // ==========================================
 
-Route::get('/', [PetaController::class, 'index'])
-    ->name('peta.index');
+Route::controller(PetaController::class)->group(function () {
 
-Route::get('/data/sekolah', [PetaController::class, 'geojson'])
-    ->name('peta.data');
+    Route::get('/', 'index')->name('peta.index');
+
+    Route::get('/data/sekolah', 'geojson')->name('peta.data');
+
+});
 
  // Halaman profil publik sekolah
 Route::get('/profil-sekolah/{sekolah}', [

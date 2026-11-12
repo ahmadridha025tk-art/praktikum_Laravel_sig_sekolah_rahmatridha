@@ -1,4 +1,4 @@
- <?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -7,26 +7,41 @@ use Illuminate\Http\Request;
 
 class PetaController extends Controller
 {
+    // Menampilkan halaman utama peta sekolah
     public function index()
     {
-        return view('peta');
+        return view('peta.index');
     }
 
+    // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
     {
         $features = Sekolah::with('profil')
-            ->when($request->jenjang, fn ($q, $j) => $q->where('jenjang', $j))
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+
+            ->when($request->jenjang, fn ($q, $j) =>
+                $q->where('jenjang', $j)
+            )
+
+            ->when($request->status, fn ($q, $s) =>
+                $q->where('status', $s)
+            )
+
             ->get()
+
             ->map(fn ($s) => [
+
                 'type' => 'Feature',
 
                 'geometry' => [
                     'type' => 'Point',
-                    'coordinates' => [$s->longitude, $s->latitude],
+                    'coordinates' => [
+                        $s->longitude,
+                        $s->latitude
+                    ],
                 ],
 
                 'properties' => [
+
                     'id' => $s->id,
                     'npsn' => $s->npsn,
                     'nama' => $s->nama,
@@ -48,8 +63,13 @@ class PetaController extends Controller
                         : null,
 
                     // Link halaman profil publik
-                    'profil_url' => route('sekolah.profil.publik', $s->id),
+                    'profil_url' => route(
+                        'sekolah.profil.publik',
+                        $s->id
+                    ),
+
                 ],
+
             ]);
 
         return response()->json([
