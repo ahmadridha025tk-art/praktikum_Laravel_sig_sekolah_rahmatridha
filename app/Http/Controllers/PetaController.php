@@ -25,6 +25,12 @@ class PetaController extends Controller
         return view('peta.klaster');
     }
 
+    //methof peta panas
+    public function panas()
+    {
+        return view('peta.panas');
+    }
+
 
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)

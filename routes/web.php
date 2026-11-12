@@ -26,7 +26,10 @@ Route::controller(PetaController::class)->group(function () {
 
     // Menu Klaster
     Route::get('/klaster', 'klaster')->name('peta.klaster');
-    
+
+    // Menu Peta Panas
+    Route::get('/peta-panas', 'panas')->name('peta.panas');
+
     });
 
  // Halaman profil publik sekolah
