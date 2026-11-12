@@ -30,6 +30,9 @@ Route::controller(PetaController::class)->group(function () {
     // Menu Peta Panas
     Route::get('/peta-panas', 'panas')->name('peta.panas');
 
+    // Menu Rute
+    Route::get('/rute', 'rute')->name('peta.rute');
+
     });
 
       

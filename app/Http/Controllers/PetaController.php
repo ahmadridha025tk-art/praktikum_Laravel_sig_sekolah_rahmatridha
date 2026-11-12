@@ -38,6 +38,12 @@ class PetaController extends Controller
         return view('peta.wilayah');
     }
 
+    // Menampilkan halaman Rute
+    public function rute()
+    {
+        return view('peta.rute');
+    }
+
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
     {
