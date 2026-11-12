@@ -33,6 +33,8 @@ Route::controller(PetaController::class)->group(function () {
     // Menu Rute
     Route::get('/rute', 'rute')->name('peta.rute');
 
+    // Menu Cek Lokasi
+    Route::get('/cek-alamat', 'alamat')->name('peta.alamat');
     });
 
       

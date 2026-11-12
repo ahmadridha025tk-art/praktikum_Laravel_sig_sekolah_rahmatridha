@@ -44,6 +44,12 @@ class PetaController extends Controller
         return view('peta.rute');
     }
 
+    // Menampilkan halaman Cek Lokasi
+    public function alamat()
+    {
+        return view('peta.alamat');
+    }
+
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
     {
