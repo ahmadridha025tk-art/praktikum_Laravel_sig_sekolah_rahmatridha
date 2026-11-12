@@ -24,7 +24,10 @@ Route::controller(PetaController::class)->group(function () {
        // Menu Pencarian
     Route::get('/pencarian', 'cari')->name('peta.cari');
 
-});
+    // Menu Klaster
+    Route::get('/klaster', 'klaster')->name('peta.klaster');
+    
+    });
 
  // Halaman profil publik sekolah
 Route::get('/profil-sekolah/{sekolah}', [

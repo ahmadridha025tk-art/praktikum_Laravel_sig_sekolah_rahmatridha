@@ -19,6 +19,11 @@ class PetaController extends Controller
     {
         return view('peta.cari');
     }
+    //method klaster
+        public function klaster()
+    {
+        return view('peta.klaster');
+    }
 
 
     // Mengambil data sekolah dalam format GeoJSON
