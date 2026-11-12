@@ -21,6 +21,9 @@ Route::controller(PetaController::class)->group(function () {
 
     Route::get('/data/sekolah', 'geojson')->name('peta.data');
 
+       // Menu Pencarian
+    Route::get('/pencarian', 'cari')->name('peta.cari');
+
 });
 
  // Halaman profil publik sekolah

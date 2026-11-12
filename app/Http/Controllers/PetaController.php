@@ -13,6 +13,14 @@ class PetaController extends Controller
         return view('peta.index');
     }
 
+    //cari sekolah berdasarkan nama, jenjang, status, dan kecamatan
+
+    public function cari()
+    {
+        return view('peta.cari');
+    }
+
+
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
     {
