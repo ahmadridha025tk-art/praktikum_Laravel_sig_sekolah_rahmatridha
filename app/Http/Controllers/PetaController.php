@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
+use App\Support\Geometri;
 
 class PetaController extends Controller
 {
@@ -13,24 +14,29 @@ class PetaController extends Controller
         return view('peta.index');
     }
 
-    //cari sekolah berdasarkan nama, jenjang, status, dan kecamatan
-
+    // Mencari sekolah
     public function cari()
     {
         return view('peta.cari');
     }
-    //method klaster
-        public function klaster()
+
+    // Menampilkan halaman klaster
+    public function klaster()
     {
         return view('peta.klaster');
     }
 
-    //methof peta panas
+    // Menampilkan halaman peta panas
     public function panas()
     {
         return view('peta.panas');
     }
 
+    // Menampilkan halaman wilayah
+    public function wilayah()
+    {
+        return view('peta.wilayah');
+    }
 
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
@@ -96,4 +102,74 @@ class PetaController extends Controller
             'features' => $features,
         ]);
     }
+
+    // Mengambil data poligon wilayah sekolah
+    public function geojsonWilayah(Request $request)
+    {
+        $features = Sekolah::with('profil')
+
+            ->when($request->jenjang, fn ($q, $j) =>
+                $q->where('jenjang', $j)
+            )
+
+            ->get()
+
+            ->groupBy('kecamatan')
+
+            ->map(function ($kelompok, $kecamatan) {
+
+                $titik = $kelompok
+
+                    ->map(fn ($s) => [
+                        $s->longitude,
+                        $s->latitude
+                    ])
+
+                    ->all();
+
+                $hull = Geometri::convexHull($titik);
+
+                // Poligon memerlukan minimal 3 titik
+                if (count($hull) < 3) {
+                    return null;
+                }
+
+                // Menutup cincin poligon GeoJSON
+                $hull[] = $hull[0];
+
+                return [
+
+                    'type' => 'Feature',
+
+                    'geometry' => [
+                        'type' => 'Polygon',
+                        'coordinates' => [$hull],
+                    ],
+
+                    'properties' => [
+
+                        'kecamatan' => $kecamatan,
+
+                        'jumlah_sekolah' => $kelompok->count(),
+
+                        'jumlah_siswa' => (int) $kelompok->sum(
+                            fn ($s) => $s->profil?->jumlah_siswa ?? 0
+                        ),
+
+                    ],
+
+                ];
+
+            })
+
+            ->filter()
+
+            ->values();
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => $features,
+        ]);
+    }
+
 }

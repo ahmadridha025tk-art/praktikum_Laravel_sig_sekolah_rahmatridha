@@ -32,6 +32,22 @@ Route::controller(PetaController::class)->group(function () {
 
     });
 
+      
+// ==========================================
+// MENU WILAYAH
+// ==========================================
+
+Route::get('/wilayah', [
+    PetaController::class,
+    'wilayah'
+])->name('peta.wilayah');
+
+Route::get('/data/wilayah', [
+    PetaController::class,
+    'geojsonWilayah'
+])->name('peta.data.wilayah');
+
+
  // Halaman profil publik sekolah
 Route::get('/profil-sekolah/{sekolah}', [
     PublicProfilSekolahController::class,
