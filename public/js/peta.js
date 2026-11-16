@@ -23,17 +23,24 @@ const Peta = {
     },
 
     // Mengambil seluruh fitur (Feature) sekolah dari endpoint GeoJSON
-    async ambilSekolah(jenjang = '') {
-        const url = `${window.PETA_URL.data}?jenjang=${encodeURIComponent(jenjang)}`;
-        const respon = await fetch(url);
+    async ambilSekolah(jenjang = '', status = '') {
+    const parameter = new URLSearchParams({
+        jenjang: jenjang,
+        status: status
+    });
 
-        if (!respon.ok) {
-            throw new Error('Gagal memuat data sekolah');
-        }
+    const url = `${window.PETA_URL.data}?${parameter.toString()}`;
 
-        const data = await respon.json();
-        return data.features;
-    },
+    const respon = await fetch(url);
+
+    if (!respon.ok) {
+        throw new Error('Gagal memuat data sekolah');
+    }
+
+    const data = await respon.json();
+
+    return data.features;
+},
 
     // GeoJSON [lng, lat] menjadi Leaflet [lat, lng]
     latlng(fitur) {
