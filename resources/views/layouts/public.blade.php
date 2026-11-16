@@ -89,20 +89,18 @@
 
         .toolbar input,
         .toolbar select,
-        .toolbar button {
-            padding: 8px 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
+       .toolbar button {
+             background: #1e3a8a;
+             color: white;
+             border: 1px solid #1e3a8a;
+             border-radius: 6px;
+             padding: 8px 12px;
+             cursor: pointer;
         }
 
-        .toolbar button {
-            background: #1e3a8a;
-            color: #fff;
-            border-color: #1e3a8a;
-            cursor: pointer;
+        .toolbar button:hover {
+            background: #1d4ed8;SS
         }
-
         .peta {
             flex: 1;
             min-height: 300px;
