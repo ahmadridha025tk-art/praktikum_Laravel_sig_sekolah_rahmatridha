@@ -1,36 +1,20 @@
-
 @extends('layouts.public')
 
 @section('title', 'Cek Lokasi')
 
 @push('styles')
 <style>
-    /* Memastikan tile Leaflet tidak berubah ukuran akibat CSS global */
-    .leaflet-container img {
-        max-width: none !important;
-        max-height: none !important;
+    /* Area toolbar */
+    .toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 12px;
+        background: #f3f4f6;
     }
 
-    .leaflet-tile {
-        outline: 1px solid transparent;
-    }
-
-    #peta {
-        width: 100%;
-        height: 550px;
-        margin-top: 12px;
-        background: #e5e7eb;
-    }
-
-    #hasil {
-        display: none;
-        background: white;
-        padding: 16px;
-        margin-top: 12px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-    }
-
+    /* Tombol lokasi */
     #lokasi-saya {
         padding: 10px 16px;
         border: none;
@@ -45,12 +29,96 @@
         cursor: wait;
     }
 
-    .toolbar {
+    /* Wadah pembungkus Peta (Kiri) dan Hasil (Kanan) */
+    .wadah-utama {
         display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 14px;
-        padding: 12px;
+        align-items: stretch;
+        gap: 16px;
+        margin-top: 12px;
+        margin-bottom: 20px;
+    }
+
+    /* Area peta di sebelah kiri */
+    #peta {
+        position: relative !important;
+        z-index: 1;
+        flex: 1;
+        width: 100%;
+        height: 78vh !important;
+        min-height: 650px !important;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Panel hasil berada di sebelah kanan peta */
+    #hasil {
+        position: relative !important;
+        z-index: 2 !important;
+        display: none;
+        flex: 0 0 380px;
+        max-width: 380px;
+        height: 78vh;
+        min-height: 650px;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background: white;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+
+    /* Responsif untuk layar HP/Tablet kecil */
+    @media (max-width: 900px) {
+        .wadah-utama {
+            flex-direction: column;
+        }
+        #hasil {
+            flex: none;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            min-height: auto;
+        }
+    }
+
+    /* Pastikan kontrol Leaflet tetap terlihat */
+    .leaflet-container {
+        position: relative;
+        z-index: 1;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Memperbaiki gambar tile Leaflet */
+    .leaflet-container img,
+    .leaflet-tile-pane img {
+        max-width: none !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .leaflet-tile {
+        border: none !important;
+        outline: none !important;
+    }
+
+    #hasil ul {
+        list-style: none;
+        margin: 4px 0 0;
+        padding: 0;
+    }
+
+    #hasil li[data-npsn] {
+        padding: 8px 0;
+        border-top: 1px solid #e5e7eb;
+        cursor: pointer;
+    }
+
+    #hasil li[data-npsn]:hover {
         background: #f3f4f6;
     }
 </style>
@@ -69,9 +137,10 @@
     </span>
 </div>
 
-<div id="peta"></div>
-
-<div id="hasil"></div>
+<div class="wadah-utama">
+    <div id="peta"></div>
+    <div id="hasil"></div>
+</div>
 
 @endsection
 
@@ -98,17 +167,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. MEMUAT DATA SEKOLAH
     // ==========================================
 
-    Peta.ambilSekolah()
+    const dataSekolahSiap = Peta.ambilSekolah()
         .then(function (fitur) {
             semua = fitur;
 
-            console.log('Data sekolah berhasil dimuat:', semua.length);
+            console.log(
+                'Data sekolah berhasil dimuat:',
+                semua.length
+            );
+
+            return semua;
         })
         .catch(function (error) {
             console.error('Gagal memuat sekolah:', error);
 
             panel.style.display = 'block';
-            panel.textContent = 'Gagal memuat data sekolah. Periksa koneksi dan server Laravel.';
+            panel.textContent =
+                'Gagal memuat data sekolah. Periksa koneksi dan server Laravel.';
+            map.invalidateSize();
+
+            throw error;
         });
 
     // ==========================================
@@ -164,13 +242,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function prosesTitik(titik) {
 
+        // Pastikan data sekolah sudah tersedia
+        try {
+            await dataSekolahSiap;
+        } catch (error) {
+            return;
+        }
+
         const lat = titik.lat;
         const lng = titik.lng;
 
-        // Hapus penanda dan garis sebelumnya
+        // Bersihkan tampilan sebelumnya
         lapisan.clearLayers();
 
-        // Penanda titik yang dipilih
+        // ======================================
+        // ANALISIS CAKUPAN SEKOLAH RADIUS 1 KM
+        // ======================================
+
+        L.circle(titik, {
+            radius: 1000,
+            color: '#16a34a',
+            weight: 2,
+            fillColor: '#22c55e',
+            fillOpacity: 0.12
+        }).addTo(lapisan);
+
+        // Hitung sekolah dalam radius 1 km
+        const sekolahDalamRadius = semua.filter(function (f) {
+
+            const jarak = Peta.jarakKm(
+                [lat, lng],
+                Peta.latlng(f)
+            );
+
+            return jarak <= 1;
+
+        });
+
+        const jumlahSekolahDalamRadius =
+            sekolahDalamRadius.length;
+
+        // ======================================
+        // PENANDA TITIK YANG DIPILIH
+        // ======================================
+
         L.circleMarker(titik, {
             radius: 9,
             color: '#ffffff',
@@ -179,10 +294,13 @@ document.addEventListener('DOMContentLoaded', function () {
             fillOpacity: 1
         }).addTo(lapisan);
 
-        // Cari sekolah terdekat
+        // ======================================
+        // SEKOLAH TERDEKAT
+        // ======================================
+
         const dekat = terdekat([lat, lng]);
 
-        // Gambar garis menuju sekolah terdekat
+        // Gambar garis menuju tiga sekolah terdekat
         dekat.forEach(function (d) {
 
             L.polyline(
@@ -199,14 +317,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         });
 
+        // Tampilkan panel di sebelah kanan peta & sesuaikan ukuran peta
         panel.style.display = 'block';
         panel.textContent = 'Sedang mencari alamat...';
+        map.invalidateSize();
 
         // ======================================
-        // Mengambil informasi alamat
+        // MENGAMBIL INFORMASI ALAMAT
         // ======================================
 
-        let bagianAlamat = '<em>Alamat tidak dapat dimuat.</em>';
+        let bagianAlamat =
+            '<em>Alamat tidak dapat dimuat.</em>';
 
         const sekarang = Date.now();
 
@@ -232,7 +353,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     ],
                     [
                         'Kota/Kabupaten',
-                        a.city || a.town || a.municipality || a.county
+                        a.city || a.town ||
+                        a.municipality || a.county
                     ],
                     ['Provinsi', a.state],
                     ['Kode pos', a.postcode]
@@ -269,31 +391,29 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // ======================================
-        // Menampilkan daftar sekolah terdekat
+        // DAFTAR SEKOLAH TERDEKAT
         // ======================================
 
         let daftar = '';
 
         if (dekat.length === 0) {
 
-            daftar = '<li>Belum ada data sekolah yang ditemukan.</li>';
+            daftar =
+                '<li>Belum ada data sekolah yang ditemukan.</li>';
 
         } else {
 
             daftar = dekat.map(function (d) {
 
-                const npsn = d.fitur.properties.npsn || '';
-                const nama = d.fitur.properties.nama || 'Sekolah tanpa nama';
+                const npsn =
+                    d.fitur.properties.npsn || '';
+
+                const nama =
+                    d.fitur.properties.nama ||
+                    'Sekolah tanpa nama';
 
                 return `
-                    <li
-                        data-npsn="${Peta.esc(npsn)}"
-                        style="
-                            padding: 8px 0;
-                            border-top: 1px solid #e5e7eb;
-                            cursor: pointer;
-                        "
-                    >
+                    <li data-npsn="${Peta.esc(npsn)}">
                         <strong>${Peta.esc(nama)}</strong>
                         <br>
                         <small>
@@ -307,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // ======================================
-        // Menampilkan hasil keseluruhan
+        // MENAMPILKAN HASIL KESELURUHAN
         // ======================================
 
         panel.innerHTML = `
@@ -322,17 +442,35 @@ document.addEventListener('DOMContentLoaded', function () {
             ${bagianAlamat}
 
             <strong style="display: block; margin-top: 12px;">
-                Sekolah terdekat
+                Analisis Cakupan Sekolah
             </strong>
 
-            <ul style="
-                list-style: none;
-                margin: 4px 0 0;
-                padding: 0;
+            <div style="
+                background: #f0fdf4;
+                border: 1px solid #bbf7d0;
+                padding: 10px;
+                margin-top: 6px;
+                border-radius: 6px;
             ">
+                Radius cakupan: <strong>1 km</strong>
+                <br>
+                Jumlah sekolah dalam cakupan:
+                <strong>${jumlahSekolahDalamRadius} sekolah</strong>
+            </div>
+
+            <strong style="display: block; margin-top: 12px;">
+                Sekolah Terdekat
+            </strong>
+
+            <ul>
                 ${daftar}
             </ul>
         `;
+
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 100);
+
     }
 
     // ==========================================
@@ -402,10 +540,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const titik = L.latLng(lat, lng);
 
-                    // Hapus penanda GPS sebelumnya
+                    // Bersihkan lokasi GPS sebelumnya
                     lapisanLokasiSaya.clearLayers();
 
-                    // Tampilkan lokasi pengguna
+                    // Tampilkan penanda lokasi pengguna
                     L.marker(titik)
                         .bindPopup('Lokasi Saya')
                         .addTo(lapisanLokasiSaya)
@@ -414,18 +552,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Pindahkan peta ke lokasi pengguna
                     map.setView(titik, 15);
 
-                    // Jalankan pencarian alamat dan sekolah terdekat
+                    // Cari alamat dan sekolah terdekat
                     await prosesTitik(titik);
 
                 } catch (error) {
 
-                    console.error('Kesalahan pemrosesan GPS:', error);
+                    console.error(
+                        'Kesalahan pemrosesan GPS:',
+                        error
+                    );
 
-                    alert('Lokasi ditemukan, tetapi gagal menampilkan hasil. Periksa Console browser.');
+                    alert(
+                        'Lokasi ditemukan, tetapi gagal menampilkan hasil.'
+                    );
 
                 } finally {
 
-                    // Selalu kembalikan tombol
                     tombolLokasi.disabled = false;
                     tombolLokasi.textContent = 'Lokasi Saya';
 
@@ -438,17 +580,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 let pesan = 'Gagal mendapatkan lokasi.';
 
                 if (error.code === 1) {
-
-                    pesan = 'Izin lokasi ditolak. Izinkan akses lokasi pada browser.';
-
+                    pesan =
+                        'Izin lokasi ditolak. Izinkan akses lokasi pada browser.';
                 } else if (error.code === 2) {
-
-                    pesan = 'Lokasi tidak tersedia. Periksa GPS atau koneksi perangkat.';
-
+                    pesan =
+                        'Lokasi tidak tersedia. Periksa GPS atau koneksi perangkat.';
                 } else if (error.code === 3) {
-
-                    pesan = 'Waktu pencarian lokasi habis. Silakan coba lagi.';
-
+                    pesan =
+                        'Waktu pencarian lokasi habis. Silakan coba lagi.';
                 }
 
                 alert(pesan);
@@ -466,6 +605,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         );
 
+    });
+
+    // Sesuaikan ukuran peta setelah halaman selesai dibuat
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 300);
+
+    window.addEventListener('resize', function () {
+        map.invalidateSize();
     });
 
 });
