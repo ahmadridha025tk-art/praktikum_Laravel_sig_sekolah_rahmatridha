@@ -45,6 +45,9 @@
     </label>
 
     <span id="jumlah"></span>
+    <button type="button" id="unduh-geojson">
+    Unduh GeoJSON
+</button>
 </div>
 
 <div id="peta" class="peta"></div>
@@ -230,6 +233,29 @@
 
     // Jalankan pertama kali
     muat();
+
+    // Unduh data sekolah dalam format GeoJSON
+document.getElementById('unduh-geojson')
+    .addEventListener('click', () => {
+        const geojson = {
+            type: 'FeatureCollection',
+            features: dataSekolah
+        };
+
+        const file = new Blob(
+            [JSON.stringify(geojson, null, 2)],
+            { type: 'application/geo+json' }
+        );
+
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = 'data-sekolah.geojson';
+        link.click();
+
+        URL.revokeObjectURL(url);
+    });
 </script>
 
 @endpush
