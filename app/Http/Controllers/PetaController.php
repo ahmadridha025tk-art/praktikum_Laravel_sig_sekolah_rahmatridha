@@ -60,10 +60,21 @@ class PetaController extends Controller
             )
 
             ->when($request->status, fn ($q, $s) =>
-                $q->where('status', $s)
-            )
+    $q->where('status', $s)
+)
 
-            ->get()
+->when($request->filled('bbox'), function ($q) use ($request) {
+    $bbox = explode(',', $request->bbox);
+
+    if (count($bbox) === 4 && collect($bbox)->every('is_numeric')) {
+        [$barat, $selatan, $timur, $utara] = array_map('floatval', $bbox);
+
+        $q->whereBetween('longitude', [$barat, $timur])
+          ->whereBetween('latitude', [$selatan, $utara]);
+    }
+})
+
+->get()
 
             ->map(fn ($s) => [
 

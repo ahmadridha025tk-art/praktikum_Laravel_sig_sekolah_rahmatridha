@@ -23,11 +23,15 @@ const Peta = {
     },
 
     // Mengambil seluruh fitur (Feature) sekolah dari endpoint GeoJSON
-    async ambilSekolah(jenjang = '', status = '') {
+   async ambilSekolah(jenjang = '', status = '', bbox = '') {
     const parameter = new URLSearchParams({
         jenjang: jenjang,
         status: status
     });
+
+    if (bbox) {
+        parameter.set('bbox', bbox);
+    }
 
     const url = `${window.PETA_URL.data}?${parameter.toString()}`;
 
@@ -41,11 +45,32 @@ const Peta = {
 
     return data.features;
 },
-
     // GeoJSON [lng, lat] menjadi Leaflet [lat, lng]
     latlng(fitur) {
         const [lng, lat] = fitur.geometry.coordinates;
         return [lat, lng];
+    },
+
+        // Menampilkan batas wilayah kecamatan dari GeoJSON resmi
+    async tampilkanBatasKecamatan(map) {
+        const respon = await fetch('/data/batas-kecamatan.geojson');
+
+        if (!respon.ok) {
+            throw new Error('Gagal memuat batas kecamatan');
+        }
+
+        const data = await respon.json();
+
+        const layer = L.geoJSON(data, {
+            style: {
+                color: '#2563eb',
+                weight: 2,
+                fillColor: '#60a5fa',
+                fillOpacity: 0.15
+            }
+        }).addTo(map);
+
+        return layer;
     },
 
     popup(fitur) {

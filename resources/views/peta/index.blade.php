@@ -103,6 +103,7 @@
     lapisanMarker.addTo(map);
 
     let dataSekolah = [];
+    let sudahFitAwal = false;
 
     // Menggambar ulang seluruh lapisan
     function gambarLapisan() {
@@ -185,37 +186,48 @@
             dataSekolah.length + ' sekolah';
     }
 
-    // Mengambil data sekolah dengan filter
-    async function muat() {
-        try {
-            const jenjang =
-                document.getElementById('filter-jenjang').value;
+   
+// Mengambil data sekolah dengan filter Bounding Box
+async function muat() {
+    try {
+        const jenjang =
+            document.getElementById('filter-jenjang').value;
 
-            const status =
-                document.getElementById('filter-status').value;
+        const status =
+            document.getElementById('filter-status').value;
 
-            dataSekolah = await Peta.ambilSekolah(
-                jenjang,
-                status
+        // Pemuatan pertama mengambil semua sekolah
+        const bbox = sudahFitAwal
+            ? map.getBounds().toBBoxString()
+            : '';
+
+        dataSekolah = await Peta.ambilSekolah(
+            jenjang,
+            status,
+            bbox
+        );
+
+        gambarLapisan();
+
+        // Atur tampilan peta hanya saat pemuatan pertama
+        if (!sudahFitAwal && dataSekolah.length > 0) {
+            sudahFitAwal = true;
+
+            map.fitBounds(
+                L.latLngBounds(
+                    dataSekolah.map(Peta.latlng)
+                ).pad(0.1)
             );
-
-            gambarLapisan();
-
-            if (dataSekolah.length > 0) {
-                map.fitBounds(
-                    L.latLngBounds(
-                        dataSekolah.map(Peta.latlng)
-                    ).pad(0.1)
-                );
-            }
-
-        } catch (error) {
-            console.error(error);
-
-            document.getElementById('jumlah').textContent =
-                'Gagal memuat data sekolah';
         }
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById('jumlah').textContent =
+            'Gagal memuat data sekolah';
     }
+}
+
 
     // Event filter
     document.getElementById('filter-jenjang')
@@ -231,8 +243,16 @@
     document.getElementById('radius')
         .addEventListener('input', gambarLapisan);
 
-    // Jalankan pertama kali
-    muat();
+    // Muat ulang data ketika peta digeser atau diperbesar
+map.on('moveend', () => {
+    if (sudahFitAwal) {
+        muat();
+    }
+});
+
+// Jalankan pertama kali
+muat();
+
 
     // Unduh data sekolah dalam format GeoJSON
 document.getElementById('unduh-geojson')
