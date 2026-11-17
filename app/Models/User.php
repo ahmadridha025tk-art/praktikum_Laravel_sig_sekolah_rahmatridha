@@ -28,35 +28,35 @@ class User extends Authenticatable
     ];
 
     protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'role' => Role::class,
+    ];
+}
 
     public function sekolah(): BelongsTo
     {
         return $this->belongsTo(Sekolah::class);
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === Role::ADMIN->value;
-    }
+   public function isAdmin(): bool
+{
+    return $this->role === Role::ADMIN;
+}
 
-    public function isDinas(): bool
-    {
-        return $this->role === Role::DINAS->value;
-    }
+public function isDinas(): bool
+{
+    return $this->role === Role::DINAS;
+}
 
-    public function isSekolah(): bool
-    {
-        return $this->role === Role::SEKOLAH->value;
-    }
-
+public function isSekolah(): bool
+{
+    return $this->role === Role::SEKOLAH;
+}
     public function roleLabel(): string
-    {
-        return Role::tryFrom($this->role)?->label() ?? 'Tidak diketahui';
-    }
+{
+    return $this->role?->label() ?? 'Tidak diketahui';
+}
 }
