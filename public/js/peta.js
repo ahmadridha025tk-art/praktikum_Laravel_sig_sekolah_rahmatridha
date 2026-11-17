@@ -48,6 +48,28 @@ const Peta = {
         return [lat, lng];
     },
 
+        // Menampilkan batas wilayah kecamatan dari GeoJSON resmi
+    async tampilkanBatasKecamatan(map) {
+        const respon = await fetch('/data/batas-kecamatan.geojson');
+
+        if (!respon.ok) {
+            throw new Error('Gagal memuat batas kecamatan');
+        }
+
+        const data = await respon.json();
+
+        const layer = L.geoJSON(data, {
+            style: {
+                color: '#2563eb',
+                weight: 2,
+                fillColor: '#60a5fa',
+                fillOpacity: 0.15
+            }
+        }).addTo(map);
+
+        return layer;
+    },
+
     popup(fitur) {
         const p = fitur.properties;
         const [lat, lng] = Peta.latlng(fitur);

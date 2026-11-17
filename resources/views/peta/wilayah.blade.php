@@ -58,91 +58,114 @@
 
 @endsection
 
+
 @push('scripts')
 
 <script>
-
     const map = Peta.buat('peta');
 
     let lapisan = null;
 
     function warna(rasio) {
-
         if (rasio >= 0.8) return '#dc2626';
-
         if (rasio >= 0.6) return '#ea580c';
-
         if (rasio >= 0.4) return '#f59e0b';
-
         return '#3b82f6';
-
     }
 
     async function muat(jenjang = '') {
+        const url = `${window.PETA_URL.wilayah}?jenjang=${encodeURIComponent(jenjang)}`;
 
-        const url =
-            `${window.PETA_URL.wilayah}?jenjang=${encodeURIComponent(jenjang)}`;
+        const [responSekolah, responBatas] = await Promise.all([
+            fetch(url),
+            fetch('/data/batas-kecamatan.geojson')
+        ]);
 
-        const data = await (await fetch(url)).json();
+        if (!responSekolah.ok || !responBatas.ok) {
+            throw new Error('Gagal memuat data wilayah');
+        }
+
+        const dataSekolah = await responSekolah.json();
+        const dataBatas = await responBatas.json();
+
+        // Menyiapkan data jumlah sekolah berdasarkan nama kecamatan
+        const daftarSekolah = new Map(
+            dataSekolah.features.map(f => [
+                f.properties.kecamatan.trim().toLowerCase(),
+                f.properties
+            ])
+        );
+
+        // Menggabungkan batas BIG dengan data jumlah sekolah
+        const fitur = dataBatas.features.map(f => {
+            const nama = f.properties.WADMKC.trim().toLowerCase();
+            const sekolah = daftarSekolah.get(nama) || {};
+
+            return {
+                ...f,
+                properties: {
+                    ...f.properties,
+                    jumlah_sekolah: sekolah.jumlah_sekolah ?? 0,
+                    jumlah_siswa: sekolah.jumlah_siswa ?? 0
+                }
+            };
+        });
 
         if (lapisan) {
             map.removeLayer(lapisan);
         }
 
-        const maks = Math.max(1, ...data.features.map((f) =>
-            f.properties.jumlah_sekolah
-        ));
+        const maks = Math.max(
+            1,
+            ...fitur.map(f => f.properties.jumlah_sekolah)
+        );
 
-        lapisan = L.geoJSON(data, {
-
-            style: (f) => {
-
-                const w = warna(
-                    f.properties.jumlah_sekolah / maks
-                );
+        lapisan = L.geoJSON(fitur, {
+            style: f => {
+                const rasio = f.properties.jumlah_sekolah / maks;
+                const w = warna(rasio);
 
                 return {
                     color: w,
                     fillColor: w,
                     fillOpacity: 0.3,
-                    weight: 3
+                    weight: 2
                 };
-
             },
 
             onEachFeature: (f, layer) => {
-
                 const p = f.properties;
 
                 layer.bindTooltip(
-                    Peta.esc(p.kecamatan),
+                    Peta.esc(p.WADMKC),
                     { sticky: true }
                 );
 
                 layer.bindPopup(`
-                    <strong>${Peta.esc(p.kecamatan)}</strong><br>
+                    <strong>${Peta.esc(p.WADMKC)}</strong><br>
                     Jumlah sekolah: ${p.jumlah_sekolah}<br>
                     Jumlah siswa: ${p.jumlah_siswa}
                 `);
-
-            },
+            }
 
         }).addTo(map);
 
         document.getElementById('jumlah').textContent =
-            data.features.length + ' wilayah';
+            fitur.length + ' wilayah';
 
-        if (data.features.length > 0) {
+        if (fitur.length > 0) {
             map.fitBounds(lapisan.getBounds().pad(0.1));
         }
-
     }
 
     document.getElementById('filter-jenjang')
-        .addEventListener('change', (e) => muat(e.target.value));
+        .addEventListener('change', e => muat(e.target.value));
 
-    muat();
-
+    muat().catch(error => {
+        console.error(error);
+        alert('Gagal memuat peta wilayah. Periksa Console.');
+    });
 </script>
 
 @endpush
+
