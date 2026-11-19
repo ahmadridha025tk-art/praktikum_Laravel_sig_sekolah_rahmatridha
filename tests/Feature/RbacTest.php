@@ -26,8 +26,10 @@ class RbacTest extends TestCase
             'status' => 'Negeri',
             'alamat' => 'Jl. Uji',
             'kecamatan' => 'Uji',
-            'latitude' => -3.3,
+            'latitude' => -3.1,
             'longitude' => 114.59,
+            'latitude_awal' => -3.1,
+            'longitude_awal' => 114.59,
         ]);
     }
 
@@ -65,22 +67,29 @@ class RbacTest extends TestCase
     {
         $admin = $this->user('admin');
 
-        $this->actingAs($admin)->get('/admin/users')->assertOk();
-        $this->actingAs($admin)->get('/dinas/sekolah')->assertForbidden();
+        $this->actingAs($admin)
+            ->get('/admin/users')
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->get('/dinas/sekolah')
+            ->assertForbidden();
     }
 
     public function test_admin_menambah_pengguna_sekolah(): void
     {
         $sekolah = $this->sekolah('11111111');
 
-        $this->actingAs($this->user('admin'))->post('/admin/users', [
-            'name' => 'Operator',
-            'email' => 'op@uji.test',
-            'role' => 'sekolah',
-            'sekolah_id' => $sekolah->id,
-            'password' => 'rahasia123',
-            'password_confirmation' => 'rahasia123',
-        ])->assertRedirect('/admin/users');
+        $this->actingAs($this->user('admin'))
+            ->post('/admin/users', [
+                'name' => 'Operator',
+                'email' => 'op@uji.test',
+                'role' => 'sekolah',
+                'sekolah_id' => $sekolah->id,
+                'password' => 'rahasia123',
+                'password_confirmation' => 'rahasia123',
+            ])
+            ->assertRedirect('/admin/users');
 
         $this->assertDatabaseHas('users', [
             'email' => 'op@uji.test',
@@ -91,13 +100,15 @@ class RbacTest extends TestCase
 
     public function test_role_sekolah_wajib_memilih_sekolah(): void
     {
-        $this->actingAs($this->user('admin'))->post('/admin/users', [
-            'name' => 'Operator',
-            'email' => 'op@uji.test',
-            'role' => 'sekolah',
-            'password' => 'rahasia123',
-            'password_confirmation' => 'rahasia123',
-        ])->assertSessionHasErrors('sekolah_id');
+        $this->actingAs($this->user('admin'))
+            ->post('/admin/users', [
+                'name' => 'Operator',
+                'email' => 'op@uji.test',
+                'role' => 'sekolah',
+                'password' => 'rahasia123',
+                'password_confirmation' => 'rahasia123',
+            ])
+            ->assertSessionHasErrors('sekolah_id');
     }
 
     public function test_dinas_mengelola_semua_sekolah(): void
@@ -105,10 +116,21 @@ class RbacTest extends TestCase
         $a = $this->sekolah('11111111');
         $dinas = $this->user('dinas');
 
-        $this->actingAs($dinas)->get('/dinas/sekolah')->assertOk();
-        $this->actingAs($dinas)->get("/sekolah/{$a->id}/edit")->assertOk();
-        $this->actingAs($dinas)->get("/sekolah/{$a->id}/profil")->assertOk();
-        $this->actingAs($dinas)->get('/admin/users')->assertForbidden();
+        $this->actingAs($dinas)
+            ->get('/dinas/sekolah')
+            ->assertOk();
+
+        $this->actingAs($dinas)
+            ->get("/sekolah/{$a->id}/edit")
+            ->assertOk();
+
+        $this->actingAs($dinas)
+            ->get("/sekolah/{$a->id}/profil")
+            ->assertOk();
+
+        $this->actingAs($dinas)
+            ->get('/admin/users')
+            ->assertForbidden();
     }
 
     public function test_sekolah_hanya_mengakses_sekolah_sendiri(): void
@@ -117,11 +139,25 @@ class RbacTest extends TestCase
         $b = $this->sekolah('22222222');
         $op = $this->user('sekolah', $a);
 
-        $this->actingAs($op)->get("/sekolah/{$a->id}/edit")->assertOk();
-        $this->actingAs($op)->get("/sekolah/{$b->id}/edit")->assertForbidden();
-        $this->actingAs($op)->get("/sekolah/{$b->id}/profil")->assertForbidden();
-        $this->actingAs($op)->get('/dinas/sekolah')->assertForbidden();
-        $this->actingAs($op)->get('/admin/users')->assertForbidden();
+        $this->actingAs($op)
+            ->get("/sekolah/{$a->id}/edit")
+            ->assertOk();
+
+        $this->actingAs($op)
+            ->get("/sekolah/{$b->id}/edit")
+            ->assertForbidden();
+
+        $this->actingAs($op)
+            ->get("/sekolah/{$b->id}/profil")
+            ->assertForbidden();
+
+        $this->actingAs($op)
+            ->get('/dinas/sekolah')
+            ->assertForbidden();
+
+        $this->actingAs($op)
+            ->get('/admin/users')
+            ->assertForbidden();
     }
 
     public function test_sekolah_tidak_dapat_mengubah_npsn(): void
@@ -129,16 +165,18 @@ class RbacTest extends TestCase
         $a = $this->sekolah('11111111');
         $op = $this->user('sekolah', $a);
 
-        $this->actingAs($op)->put("/sekolah/{$a->id}", [
-            'npsn' => '99999999',
-            'nama' => 'Nama Baru',
-            'jenjang' => 'SD',
-            'status' => 'Negeri',
-            'alamat' => 'Jl. Baru',
-            'kecamatan' => 'Uji',
-            'latitude' => -3.31,
-            'longitude' => 114.6,
-        ])->assertRedirect();
+        $this->actingAs($op)
+            ->put("/sekolah/{$a->id}", [
+                'npsn' => '99999999',
+                'nama' => 'Nama Baru',
+                'jenjang' => 'SD',
+                'status' => 'Negeri',
+                'alamat' => 'Jl. Baru',
+                'kecamatan' => 'Uji',
+                'latitude' => -3.1,
+                'longitude' => 114.59,
+            ])
+            ->assertRedirect();
 
         $a->refresh();
 
@@ -151,10 +189,12 @@ class RbacTest extends TestCase
         $a = $this->sekolah('11111111');
         $op = $this->user('sekolah', $a);
 
-        $this->actingAs($op)->put("/sekolah/{$a->id}/profil", [
-            'kepala_sekolah' => 'Bapak Uji',
-            'akreditasi' => 'A',
-        ])->assertRedirect();
+        $this->actingAs($op)
+            ->put("/sekolah/{$a->id}/profil", [
+                'kepala_sekolah' => 'Bapak Uji',
+                'akreditasi' => 'A',
+            ])
+            ->assertRedirect();
 
         $this->assertDatabaseHas('profil_sekolahs', [
             'sekolah_id' => $a->id,
@@ -167,7 +207,8 @@ class RbacTest extends TestCase
         $a = $this->sekolah('11111111');
         $op = $this->user('sekolah', $a);
 
-        $this->actingAs($op)->delete("/dinas/sekolah/{$a->id}")
+        $this->actingAs($op)
+            ->delete("/dinas/sekolah/{$a->id}")
             ->assertForbidden();
 
         $this->assertDatabaseHas('sekolahs', [

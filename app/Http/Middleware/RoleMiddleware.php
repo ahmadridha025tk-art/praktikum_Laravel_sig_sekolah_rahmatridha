@@ -20,8 +20,10 @@ class RoleMiddleware
             abort(403, 'Anda tidak memiliki hak akses.');
         }
 
-        $userRole = Role::tryFrom($user->role);
-
+        $userRole = $user->role instanceof Role
+            ? $user->role
+            : Role::tryFrom($user->role);
+            
         $allowedRoles = array_filter(
             array_map(
                 fn (string $role) => Role::tryFrom($role),
