@@ -1,0 +1,27 @@
+.git
+.github
+.env
+.env .*
+! . env. example
+database/database.sqlite
+node_modules
+npm-debug. log
+yarn-error. log
+tests
+vendor
+public/build
+public/hot
+storage/logs
+storage/ *. key
+storage/logs/*
+! storage/logs/.gitignore
+storage/framework/cache/*
+! storage/framework/cache/.gitignore
+storage/framework/sessions/*
+! storage/framework/sessions/.gitignore
+storage/framework/views/*
+! storage/framework/views/.gitignore
+bootstrap/cache/ *. php
+.vercel
+sig-sekolah
+*. md
