@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Pencarian')
-
+//
 @push('styles')
 <style>
     .toolbar {
