@@ -22,8 +22,8 @@ class AuthController extends Controller
         // Normalisasi email menjadi huruf kecil
         $credentials['email'] = strtolower(trim($credentials['email']));
 
-        // Hanya akun aktif yang boleh login
-        $credentials['is_active'] = true;
+        // Hanya akun aktif yang boleh login (aman untuk PostgreSQL + DB_EMULATE_PREPARES)
+        $credentials['is_active'] = fn ($query) => $query->whereRaw('is_active IS TRUE');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
