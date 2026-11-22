@@ -30,7 +30,7 @@ class AuthController extends Controller
 
             return redirect()->intended(route('dashboard'));
         }
-
+//
         return back()
             ->withErrors(['email' => 'Email atau kata sandi salah.'])
             ->onlyInput('email');
