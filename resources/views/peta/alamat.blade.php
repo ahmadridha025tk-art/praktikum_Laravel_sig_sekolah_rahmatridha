@@ -4,98 +4,159 @@
 
 @push('styles')
 <style>
-    /* Area toolbar */
+    /* =========================================
+       TOOLBAR
+    ========================================= */
+
     .toolbar {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         gap: 14px;
-        padding: 12px;
-        background: #f3f4f6;
+
+        padding: 16px 22px;
+
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+
+        border-radius: 0 !important;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04) !important;
+
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+
+        z-index: 10;
     }
 
-    /* Tombol lokasi */
+    .toolbar > span {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    /* =========================================
+       BUTTON LOKASI
+    ========================================= */
+
     #lokasi-saya {
-        padding: 10px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+
+        padding: 11px 18px;
+
         border: none;
-        border-radius: 6px;
-        background: #1e3a8a;
-        color: white;
+        border-radius: 12px;
+
+        background: linear-gradient(135deg, #2414d8, #4338f0);
+        color: #ffffff;
+
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+
         cursor: pointer;
+
+        box-shadow: 0 5px 15px rgba(36, 20, 216, 0.22);
+
+        transition: all 0.25s ease;
+    }
+
+    #lokasi-saya::before {
+        content: "⌖";
+        font-size: 19px;
+        line-height: 1;
+    }
+
+    #lokasi-saya:hover {
+        background: linear-gradient(135deg, #3829e8, #5147ff);
+        transform: translateY(-2px);
+
+        box-shadow: 0 8px 20px rgba(36, 20, 216, 0.28);
+    }
+
+    #lokasi-saya:active {
+        transform: scale(0.97);
     }
 
     #lokasi-saya:disabled {
         opacity: 0.65;
         cursor: wait;
+        transform: none;
     }
 
-    /* Wadah pembungkus Peta (Kiri) dan Hasil (Kanan) */
+    /* =========================================
+       AREA UTAMA
+    ========================================= */
+
     .wadah-utama {
         display: flex;
         align-items: stretch;
-        gap: 16px;
-        margin-top: 12px;
-        margin-bottom: 20px;
+        gap: 18px;
+
+        flex: 1;
+        min-height: 0;
+
+        padding: 18px;
+
+        margin: 0;
+        background: #f4f6fb;
     }
 
-    /* Area peta di sebelah kiri */
+    /* =========================================
+       PETA
+    ========================================= */
+
     #peta {
         position: relative !important;
         z-index: 1;
+
         flex: 1;
+        min-width: 0;
+
         width: 100%;
-        height: 78vh !important;
-        min-height: 650px !important;
-        border-radius: 8px;
+        height: 100% !important;
+        min-height: 400px !important;
+
+        border-radius: 18px;
         overflow: hidden;
+
+        border: 1px solid #e2e8f0;
+
+        box-shadow:
+            0 8px 24px rgba(15, 23, 42, 0.08);
     }
 
-    /* Panel hasil berada di sebelah kanan peta */
-    #hasil {
-        position: relative !important;
-        z-index: 2 !important;
-        display: none;
-        flex: 0 0 380px;
-        max-width: 380px;
-        height: 78vh;
-        min-height: 650px;
-        overflow-y: auto;
-        box-sizing: border-box;
-        background: white;
-        padding: 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-    }
-
-    /* Responsif untuk layar HP/Tablet kecil */
-    @media (max-width: 900px) {
-        .wadah-utama {
-            flex-direction: column;
-        }
-        #hasil {
-            flex: none;
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            min-height: auto;
-        }
-    }
-
-    /* Pastikan kontrol Leaflet tetap terlihat */
     .leaflet-container {
         position: relative;
         z-index: 1;
+
         width: 100% !important;
         height: 100% !important;
+
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Memperbaiki gambar tile Leaflet */
+    /* Memperbaiki tile Leaflet */
+
     .leaflet-container img,
     .leaflet-tile-pane img {
         max-width: none !important;
         max-height: none !important;
+
         padding: 0 !important;
         margin: 0 !important;
+
         border: none !important;
         outline: none !important;
         box-shadow: none !important;
@@ -106,20 +167,233 @@
         outline: none !important;
     }
 
+    /* =========================================
+       PANEL HASIL
+    ========================================= */
+
+    #hasil {
+        position: relative !important;
+        z-index: 2 !important;
+
+        display: none;
+
+        flex: 0 0 360px;
+        width: 360px;
+        max-width: 360px;
+
+        height: 100%;
+        min-height: 400px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        box-sizing: border-box;
+
+        background: #ffffff;
+
+        padding: 22px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+
+        box-shadow:
+            0 8px 24px rgba(15, 23, 42, 0.06);
+
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    /* Judul dan teks panel */
+
+    #hasil strong {
+        color: #172033;
+        font-weight: 800;
+    }
+
+    #hasil p {
+        color: #475569;
+        line-height: 1.7;
+        font-size: 13px;
+    }
+
+    #hasil table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+    }
+
+    #hasil table td {
+        vertical-align: top;
+        padding: 7px 5px 7px 0 !important;
+
+        font-size: 12.5px;
+        color: #334155;
+
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    #hasil table td:first-child {
+        width: 42%;
+        color: #64748b !important;
+    }
+
+    /* =========================================
+       LIST SEKOLAH
+    ========================================= */
+
     #hasil ul {
         list-style: none;
-        margin: 4px 0 0;
+        margin: 8px 0 0;
         padding: 0;
     }
 
     #hasil li[data-npsn] {
-        padding: 8px 0;
-        border-top: 1px solid #e5e7eb;
+        padding: 12px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+
+        margin-bottom: 8px;
+
         cursor: pointer;
+
+        background: #ffffff;
+
+        transition: all 0.2s ease;
     }
 
     #hasil li[data-npsn]:hover {
-        background: #f3f4f6;
+        background: #f5f7ff;
+
+        border-color: #c7d2fe;
+
+        transform: translateX(3px);
+    }
+
+    #hasil li strong {
+        color: #2414d8;
+        font-size: 13px;
+    }
+
+    #hasil li small {
+        display: inline-block;
+        margin-top: 5px;
+
+        color: #64748b;
+        font-size: 11.5px;
+    }
+
+    /* =========================================
+       LEAFLET CONTROL
+    ========================================= */
+
+    .leaflet-top.leaflet-left {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .leaflet-bar {
+        border: none !important;
+        border-radius: 12px !important;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 8px 20px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .leaflet-bar a {
+        background: rgba(255, 255, 255, 0.96) !important;
+        color: #10182d !important;
+
+        border-bottom: 1px solid #e2e8f0 !important;
+
+        transition: all 0.2s ease;
+    }
+
+    .leaflet-bar a:hover {
+        background: #2414d8 !important;
+        color: #ffffff !important;
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 14px !important;
+
+        box-shadow:
+            0 12px 28px rgba(15, 23, 42, 0.15) !important;
+
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    /* =========================================
+       RESPONSIVE TABLET
+    ========================================= */
+
+    @media (max-width: 900px) {
+
+        .wadah-utama {
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        #peta {
+            flex: none;
+
+            width: 100%;
+            height: 60vh !important;
+            min-height: 380px !important;
+        }
+
+        #hasil {
+            flex: none;
+
+            width: 100%;
+            max-width: 100%;
+
+            height: auto;
+            min-height: auto;
+
+            max-height: 450px;
+        }
+    }
+
+    /* =========================================
+       RESPONSIVE HP
+    ========================================= */
+
+    @media (max-width: 600px) {
+
+        .toolbar {
+            padding: 13px 15px;
+            gap: 10px;
+        }
+
+        .toolbar > span {
+            width: 100%;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        #lokasi-saya {
+            width: 100%;
+        }
+
+        .wadah-utama {
+            padding: 10px;
+            gap: 12px;
+        }
+
+        #peta {
+            height: 55vh !important;
+            min-height: 350px !important;
+
+            border-radius: 14px;
+        }
+
+        #hasil {
+            padding: 16px;
+            border-radius: 14px;
+        }
     }
 </style>
 @endpush
@@ -127,6 +401,7 @@
 @section('content')
 
 <div class="toolbar">
+
     <button type="button" id="lokasi-saya">
         Lokasi Saya
     </button>
@@ -135,11 +410,15 @@
         Klik di mana saja pada peta untuk melihat alamat
         dan sekolah terdekat.
     </span>
+
 </div>
 
 <div class="wadah-utama">
+
     <div id="peta"></div>
+
     <div id="hasil"></div>
+
 </div>
 
 @endsection
@@ -211,9 +490,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             })
             .sort(function (a, b) {
-                return a.jarak - b.jarak;
-            })
-            .slice(0, n);
+            return a.jarak - b.jarak;
+        })
+        .slice(0, n);
     }
 
     // ==========================================
@@ -317,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         });
 
-        // Tampilkan panel di sebelah kanan peta & sesuaikan ukuran peta
+        // Tampilkan panel di sebelah kanan peta
         panel.style.display = 'block';
         panel.textContent = 'Sedang mencari alamat...';
         map.invalidateSize();
@@ -607,7 +886,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    // Sesuaikan ukuran peta setelah halaman selesai dibuat
+    // ==========================================
+    // 9. MENYESUAIKAN UKURAN PETA
+    // ==========================================
+
     setTimeout(function () {
         map.invalidateSize();
     }, 300);
