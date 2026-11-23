@@ -34,6 +34,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            color-scheme: dark;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-main);
@@ -146,6 +150,141 @@
         .sig-main {
             position: relative;
             min-height: calc(100vh - 75px);
+        }
+
+        /* =========================================================
+           GLOBAL DARK THEME OVERRIDES FOR ALL CONTENT PAGES
+           ========================================================= */
+        .sig-main .bg-white {
+            background-color: var(--bg-panel) !important;
+        }
+
+        .sig-main .bg-gray-50,
+        .sig-main .bg-slate-50,
+        .sig-main .bg-gray-100,
+        .sig-main .bg-slate-100 {
+            background-color: var(--bg-panel-light) !important;
+        }
+
+        .sig-main .hover\:bg-gray-50:hover,
+        .sig-main .hover\:bg-slate-50:hover,
+        .sig-main .hover\:bg-gray-100:hover,
+        .sig-main .hover\:bg-slate-100:hover {
+            background-color: rgba(56, 189, 248, 0.06) !important;
+        }
+
+        .sig-main .border-gray-100,
+        .sig-main .border-gray-200,
+        .sig-main .border-gray-300,
+        .sig-main .border-slate-200,
+        .sig-main .border-slate-300 {
+            border-color: var(--border-color) !important;
+        }
+
+        .sig-main .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+        .sig-main .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+        .sig-main .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Kontras teks bawaan */
+        .sig-main .text-black,
+        .sig-main .text-gray-900,
+        .sig-main .text-slate-900 {
+            color: #f8fafc !important;
+        }
+
+        .sig-main .text-gray-800,
+        .sig-main .text-gray-700,
+        .sig-main .text-slate-800,
+        .sig-main .text-slate-700 {
+            color: #e2e8f0 !important;
+        }
+
+        .sig-main .text-gray-600,
+        .sig-main .text-gray-500,
+        .sig-main .text-slate-600,
+        .sig-main .text-slate-500 {
+            color: var(--text-muted) !important;
+        }
+
+        /* Link aksi tabel (Ubah / Hapus) agar cerah di latar gelap */
+        .sig-main .text-blue-600,
+        .sig-main .text-indigo-600,
+        .sig-main .text-sky-600 {
+            color: #38bdf8 !important;
+        }
+
+        .sig-main .text-blue-600:hover,
+        .sig-main .text-indigo-600:hover,
+        .sig-main .text-sky-600:hover {
+            color: #7dd3fc !important;
+        }
+
+        .sig-main .text-red-600 {
+            color: #f87171 !important;
+        }
+
+        .sig-main .text-red-600:hover {
+            color: #fca5a5 !important;
+        }
+
+        /* Tabel global */
+        .sig-main table {
+            background-color: var(--bg-panel) !important;
+            color: var(--text-main) !important;
+        }
+
+        .sig-main thead,
+        .sig-main thead tr,
+        .sig-main thead th {
+            background-color: var(--bg-panel-light) !important;
+            color: #7dd3fc !important;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.18) !important;
+        }
+
+        .sig-main tbody tr {
+            background-color: var(--bg-panel) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            transition: background-color 0.2s ease;
+        }
+
+        .sig-main tbody tr:hover {
+            background-color: rgba(56, 189, 248, 0.06) !important;
+        }
+
+        .sig-main tbody td {
+            color: var(--text-main) !important;
+        }
+
+        /* Formulir (input, select, textarea) */
+        .sig-main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]),
+        .sig-main select,
+        .sig-main textarea {
+            background-color: #0b1322 !important;
+            color: var(--text-main) !important;
+            border: 1px solid rgba(148, 163, 184, 0.24) !important;
+        }
+
+        .sig-main input::placeholder,
+        .sig-main textarea::placeholder {
+            color: #64748b !important;
+        }
+
+        .sig-main input:not([type="checkbox"]):not([type="radio"]):focus,
+        .sig-main select:focus,
+        .sig-main textarea:focus {
+            outline: none !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+        }
+
+        /* Popup Leaflet */
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: var(--bg-panel) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-color);
         }
 
         /* Notifications */
