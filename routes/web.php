@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicProfilSekolahController;
+use App\Http\Controllers\HealthController;
 
 // ==========================================
 // PUBLIK
@@ -35,6 +36,9 @@ Route::controller(PetaController::class)->group(function () {
     // Menu Cek Lokasi
     Route::get('/cek-alamat', 'alamat')->name('peta.alamat');
     });
+
+    //health controller
+    Route::get('/health', HealthController::class)->name('health.check');
 
       
 // ==========================================

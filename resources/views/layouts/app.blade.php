@@ -404,6 +404,11 @@
                            class="sig-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             Pengguna
                         </a>
+
+                        <a href="{{ route('health.check') }}"
+                           class="sig-nav-link {{ request()->routeIs('health.check') ? 'active' : '' }}">
+                            Health
+                        </a>
                     @endif
 
                     {{-- USER PROFILE + LOGOUT --}}

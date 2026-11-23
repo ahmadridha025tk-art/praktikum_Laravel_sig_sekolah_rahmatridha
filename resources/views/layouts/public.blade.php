@@ -576,6 +576,7 @@
                 'peta.wilayah' => 'Wilayah',
                 'peta.rute'    => 'Rute',
                 'peta.alamat'  => 'Cek Lokasi',
+                'health.check' => 'Health', // <-- BARIS 500 (BARU)
             ];
         @endphp
 

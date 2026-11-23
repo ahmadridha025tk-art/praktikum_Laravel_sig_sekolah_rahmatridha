@@ -76,3 +76,4 @@ class ProfilSekolahController extends Controller
         return back()->with('success', 'Profil sekolah berhasil disimpan.');
     }
 }
+
