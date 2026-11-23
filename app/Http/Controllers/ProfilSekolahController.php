@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProfilSekolah;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache; // <-- BARIS 8 (BARU)
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -69,6 +70,8 @@ class ProfilSekolahController extends Controller
         ) {
             Storage::disk('public')->delete($logoLama);
         }
+
+        Cache::forget('data_sekolah'); // <-- BARIS 74 (BARU)
 
         return back()->with('success', 'Profil sekolah berhasil disimpan.');
     }

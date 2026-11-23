@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use App\Support\Geometri;
+use Illuminate\Support\Facades\Cache;
 
 class PetaController extends Controller
 {
@@ -53,28 +54,36 @@ class PetaController extends Controller
     // Mengambil data sekolah dalam format GeoJSON
     public function geojson(Request $request)
     {
-        $features = Sekolah::with('profil')
+        // --- MULAI PERUBAHAN (BARIS 56 - 81) ---
+        $sekolahs = Cache::remember('data_sekolah', 300, function () {
+            return Sekolah::with('profil')->get();
+        });
 
-            ->when($request->jenjang, fn ($q, $j) =>
-                $q->where('jenjang', $j)
+        $features = $sekolahs
+            ->when($request->jenjang, fn ($c, $j) =>
+                $c->where('jenjang', $j)
             )
+            ->when($request->status, fn ($c, $s) =>
+                $c->where('status', $s)
+            )
+            ->when($request->filled('bbox'), function ($c) use ($request) {
+                $bbox = explode(',', $request->bbox);
 
-            ->when($request->status, fn ($q, $s) =>
-    $q->where('status', $s)
-)
+                if (count($bbox) === 4 && collect($bbox)->every('is_numeric')) {
+                    [$barat, $selatan, $timur, $utara] = array_map('floatval', $bbox);
 
-->when($request->filled('bbox'), function ($q) use ($request) {
-    $bbox = explode(',', $request->bbox);
+                    return $c->filter(fn ($s) =>
+                        (float) $s->longitude >= $barat &&
+                        (float) $s->longitude <= $timur &&
+                        (float) $s->latitude >= $selatan &&
+                        (float) $s->latitude <= $utara
+                    );
+                }
 
-    if (count($bbox) === 4 && collect($bbox)->every('is_numeric')) {
-        [$barat, $selatan, $timur, $utara] = array_map('floatval', $bbox);
-
-        $q->whereBetween('longitude', [$barat, $timur])
-          ->whereBetween('latitude', [$selatan, $utara]);
-    }
-})
-
-->get()
+                return $c;
+            })
+            ->values()
+        // --- AKHIR PERUBAHAN ---
 
             ->map(fn ($s) => [
 

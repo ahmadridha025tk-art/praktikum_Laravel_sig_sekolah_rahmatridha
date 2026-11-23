@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache; // <-- BARIS 7 (BARU)
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -11,11 +12,17 @@ class SekolahController extends Controller
 {
     public function index(Request $request)
     {
-       $sekolahs = Sekolah::query() ->when($request->q, function ($query, $q) { 
-            $query->where(function ($w) use ($q) { 
-            $w->whereLike('nama', "%{$q}%") 
-            ->orWhereLike('npsn', "%{$q}%") ->orWhereLike('kecamatan', "%{$q}%");}); 
-            }) ->orderBy('nama') ->paginate(10) ->withQueryString(); 
+        $sekolahs = Sekolah::query()
+            ->when($request->q, function ($query, $q) {
+                $query->where(function ($w) use ($q) {
+                    $w->whereLike('nama', "%{$q}%")
+                        ->orWhereLike('npsn', "%{$q}%")
+                        ->orWhereLike('kecamatan', "%{$q}%");
+                });
+            })
+            ->orderBy('nama')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.sekolah.index', compact('sekolahs'));
     }
@@ -34,6 +41,8 @@ class SekolahController extends Controller
         $data['longitude_awal'] = $data['longitude'];
 
         Sekolah::create($data);
+
+        Cache::forget('data_sekolah'); // <-- BARIS 45 (BARU)
 
         return redirect()->route('dinas.sekolah.index')
             ->with('success', 'Data sekolah berhasil ditambahkan.');
@@ -91,6 +100,8 @@ class SekolahController extends Controller
         // Simpan perubahan jika validasi jarak berhasil
         $sekolah->update($data);
 
+        Cache::forget('data_sekolah'); // <-- BARIS 103 (BARU)
+
         return $this->kembali($request)
             ->with('success', 'Data sekolah berhasil diperbarui.');
     }
@@ -98,6 +109,8 @@ class SekolahController extends Controller
     public function destroy(Sekolah $sekolah)
     {
         $sekolah->delete();
+
+        Cache::forget('data_sekolah'); // <-- BARIS 113 (BARU)
 
         return redirect()->route('dinas.sekolah.index')
             ->with('success', 'Data sekolah berhasil dihapus.');
