@@ -3,9 +3,9 @@ name: Laravel Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, uji-preview]
   pull_request:
-    branches: [main]
+    branches: [main, uji-preview]
 
 jobs:
   test:
